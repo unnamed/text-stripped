@@ -72,25 +72,14 @@ public class GsonComponentSerializer implements ComponentSerializer<Component, C
       .registerTypeAdapter(HoverEvent.Action.class, new NameMapSerializer<>("hover action", HoverEvent.Action.NAMES))
       .registerTypeAdapter(TextColorWrapper.class, new TextColorWrapper.Serializer())
       .registerTypeAdapter(TextColor.class, new NameMapSerializer<>("text color", TextColor.NAMES))
-      .registerTypeAdapter(TextDecoration.class, new NameMapSerializer<>("text decoration", TextDecoration.NAMES))
-      .registerTypeHierarchyAdapter(BlockNbtComponent.Pos.class, BlockNbtComponentPosSerializer.INSTANCE);
+      .registerTypeAdapter(TextDecoration.class, new NameMapSerializer<>("text decoration", TextDecoration.NAMES));
     return builder;
   }
 
   static final String TEXT = "text";
   static final String TRANSLATE = "translate";
   static final String TRANSLATE_WITH = "with";
-  static final String SCORE = "score";
-  static final String SCORE_NAME = "name";
-  static final String SCORE_OBJECTIVE = "objective";
-  static final String SCORE_VALUE = "value";
-  static final String SELECTOR = "selector";
-  static final String KEYBIND = "keybind";
   static final String EXTRA = "extra";
-  static final String NBT = "nbt";
-  static final String NBT_INTERPRET = "interpret";
-  static final String NBT_BLOCK = "block";
-  static final String NBT_ENTITY = "entity";
 
   @Override
   public @NonNull Component deserialize(final @NonNull String string) {
@@ -147,32 +136,6 @@ public class GsonComponentSerializer implements ComponentSerializer<Component, C
         }
         component = TranslatableComponent.builder(key).args(args);
       }
-    } else if(object.has(SCORE)) {
-      final JsonObject score = object.getAsJsonObject(SCORE);
-      if(!score.has(SCORE_NAME) || !score.has(SCORE_OBJECTIVE)) {
-        throw new JsonParseException("A score component requires a " + SCORE_NAME + " and " + SCORE_OBJECTIVE);
-      }
-      // score components can have a value sometimes, let's grab it
-      if(score.has(SCORE_VALUE)) {
-        component = ScoreComponent.builder().name(score.get(SCORE_NAME).getAsString()).objective(score.get(SCORE_OBJECTIVE).getAsString()).value(score.get(SCORE_VALUE).getAsString());
-      } else {
-        component = ScoreComponent.builder().name(score.get(SCORE_NAME).getAsString()).objective(score.get(SCORE_OBJECTIVE).getAsString());
-      }
-    } else if(object.has(SELECTOR)) {
-      component = SelectorComponent.builder().pattern(object.get(SELECTOR).getAsString());
-    } else if(object.has(KEYBIND)) {
-      component = KeybindComponent.builder().keybind(object.get(KEYBIND).getAsString());
-    } else if(object.has(NBT)) {
-      final String nbt = object.get(NBT).getAsString();
-      final boolean interpret = object.has(NBT_INTERPRET) && object.getAsJsonPrimitive(NBT_INTERPRET).getAsBoolean();
-      if(object.has(NBT_BLOCK)) {
-        final BlockNbtComponent.Pos position = context.deserialize(object.get(NBT_BLOCK), BlockNbtComponent.Pos.class);
-        component = BlockNbtComponent.builder().nbtPath(nbt).interpret(interpret).pos(position);
-      } else if(object.has(NBT_ENTITY)) {
-        component = EntityNbtComponent.builder().nbtPath(nbt).interpret(interpret).selector(object.get(NBT_ENTITY).getAsString());
-      } else {
-        throw notSureHowToDeserialize(element);
-      }
     } else {
       throw notSureHowToDeserialize(element);
     }
@@ -209,30 +172,6 @@ public class GsonComponentSerializer implements ComponentSerializer<Component, C
           with.add(context.serialize(arg));
         }
         object.add(TRANSLATE_WITH, with);
-      }
-    } else if(src instanceof ScoreComponent) {
-      final ScoreComponent sc = (ScoreComponent) src;
-      final JsonObject score = new JsonObject();
-      score.addProperty(SCORE_NAME, sc.name());
-      score.addProperty(SCORE_OBJECTIVE, sc.objective());
-      // score component value is optional
-      if(sc.value() != null) score.addProperty(SCORE_VALUE, sc.value());
-      object.add(SCORE, score);
-    } else if(src instanceof SelectorComponent) {
-      object.addProperty(SELECTOR, ((SelectorComponent) src).pattern());
-    } else if(src instanceof KeybindComponent) {
-      object.addProperty(KEYBIND, ((KeybindComponent) src).keybind());
-    } else if(src instanceof NbtComponent) {
-      final NbtComponent<?, ?> nc = (NbtComponent<?, ?>) src;
-      object.addProperty(NBT, nc.nbtPath());
-      object.addProperty(NBT_INTERPRET, nc.interpret());
-      if(src instanceof BlockNbtComponent) {
-        final JsonElement position = context.serialize(((BlockNbtComponent) nc).pos());
-        object.add(NBT_BLOCK, position);
-      } else if(src instanceof EntityNbtComponent) {
-        object.addProperty(NBT_ENTITY, ((EntityNbtComponent) nc).selector());
-      } else {
-        throw notSureHowToSerialize(src);
       }
     } else {
       throw notSureHowToSerialize(src);

@@ -17,7 +17,7 @@ subprojects {
   apply plugin: 'net.minecrell.licenser'
 
   group 'net.kyori'
-  version '3.0.0'
+  version '3.0.0-stripped'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
@@ -74,8 +74,6 @@ subprojects {
 
       repositories {
         mavenDeployer {
-          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
           repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
             authentication(userName: sonatypeUsername, password: sonatypePassword)
           }

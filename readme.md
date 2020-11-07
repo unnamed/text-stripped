@@ -18,7 +18,7 @@ There are various artifacts:
 <dependency>
   <groupId>net.kyori</groupId>
   <artifactId>text-api</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>3.0.0-stripped</version>
 </dependency>
 ```
 * Gradle
@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-  compile 'net.kyori:text-api:2.0.0-SNAPSHOT'
+  compile 'net.kyori:text-api:3.0.0-strippe'
 }
 ```
 
@@ -37,33 +37,24 @@ dependencies {
 #### Creating components
 
 ```java
-// Creates a line of text saying "You're a Bunny! Press <key> to jump!", with some colouring and styling.
+// Creates a line of text saying "You're a Bunny! Press Space to jump!", with some colouring and styling.
 final TextComponent textComponent = TextComponent.of("You're a ")
   .color(TextColor.GRAY)
   .append(TextComponent.of("Bunny").color(TextColor.LIGHT_PURPLE))
   .append(TextComponent.of("! Press "))
-  .append(
-    KeybindComponent.of("key.jump")
-      .color(TextColor.LIGHT_PURPLE)
-      .decoration(TextDecoration.BOLD, true)
-  )
+  .append(TextComponent.of("Space"))
   .append(TextComponent.of(" to jump!"));
 // now you can send `textComponent` to something, such as a client
 ```
 
 You can also use a builder, which is mutable, and creates one final component with the children.
 ```java
-// Creates a line of text saying "You're a Bunny! Press <key> to jump!", with some colouring and styling.
+// Creates a line of text saying "You're a Bunny! Press Space to jump!", with some colouring and styling.
 final TextComponent textComponent2 = TextComponent.builder().content("You're a ")
   .color(TextColor.GRAY)
   .append(TextComponent.builder("Bunny").color(TextColor.LIGHT_PURPLE).build())
   .append(TextComponent.of("! Press "))
-  .append(
-    KeybindComponent.builder("key.jump")
-      .color(TextColor.LIGHT_PURPLE)
-      .decoration(TextDecoration.BOLD, true)
-      .build()
-  )
+  .append(TextComponent.of("Space"))
   .append(TextComponent.of(" to jump!"))
   .build();
 // now you can send `textComponent2` to something, such as a client
